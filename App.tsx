@@ -1,13 +1,18 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import TeamEntity from './src/entities/team_entity';
 import { Image } from 'expo-image';
+import TeamDetail from './details-team';
+import { useNavigation } from '@react-navigation/native';
 
 export default function App() {
 
   //Linha do state
   const [teams, setTeam] = useState<TeamEntity[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const navigation = useNavigation();
+  
 
 
   useEffect(() => {
@@ -32,7 +37,10 @@ export default function App() {
             position: team['posicao'], 
             team_shield_url: team['time']['escudo'], 
             team_name: team['time']['nome_popular'],
-            team_points: team['pontos']
+            team_points: team['pontos'],
+            team_goals_scored: team['time']['gols_pro'],
+            team_goals_conceded: team['time']['gols_contra'],
+            team_goal_difference: team['time']['saldo_gols'],
           };
 
           teamsPosition.push(dataTeam);
@@ -42,6 +50,9 @@ export default function App() {
       })
       .catch(error => console.log('error', error));
   }, []);
+  
+
+  {selectedTeam && <TeamDetail team={selectedTeam} />}
 
   return (
     <View style={styles.container}>
@@ -51,12 +62,14 @@ export default function App() {
           data={teams}
           keyExtractor={(item) => item.id.toString()}
           renderItem={(team) =>
-            <View style={styles.item}>
-              <Image style={styles.team_shield} source={team.item.team_shield_url} />
-              <Text style={styles.team_position}>{team.item.position}</Text>
-              <Text style={styles.team_name}>{team.item.team_name}</Text>
-              <Text style={styles.team_position}>{team.item.team_points}</Text>
-            </View>
+            <TouchableOpacity onPress={() => setSelectedTeam(team.item)}>
+              <View style={styles.item}>
+                <Image style={styles.team_shield} source={team.item.team_shield_url} />
+                <Text style={styles.team_position}>{team.item.position}</Text>
+                <Text style={styles.team_name}>{team.item.team_name}</Text>
+                <Text style={styles.team_position}>{team.item.team_points}</Text>
+              </View>
+            </TouchableOpacity>
           }
 
         />
@@ -108,3 +121,4 @@ const styles = StyleSheet.create({
     fontSize: 20,
   }
 });
+
